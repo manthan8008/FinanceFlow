@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,11 +12,20 @@ export default defineConfig({
             return;
           }
 
-          if (id.includes("/react/") || id.includes("/react-dom/") || id.includes("/react-router") || id.includes("/scheduler/")) {
+          if (
+            id.includes("/react/") ||
+            id.includes("/react-dom/") ||
+            id.includes("/react-router") ||
+            id.includes("/scheduler/")
+          ) {
             return "vendor-react";
           }
 
-          if (id.includes("/recharts/") || id.includes("/d3-") || id.includes("/victory-vendor/")) {
+          if (
+            id.includes("/recharts/") ||
+            id.includes("/d3-") ||
+            id.includes("/victory-vendor/")
+          ) {
             return "vendor-charts";
           }
 
@@ -28,11 +37,15 @@ export default defineConfig({
             return "vendor-icons";
           }
 
-          if (id.includes("/axios/") || id.includes("/react-hot-toast/") || id.includes("/goober/")) {
+          if (
+            id.includes("/axios/") ||
+            id.includes("/react-hot-toast/") ||
+            id.includes("/goober/")
+          ) {
             return "vendor-utils";
           }
         },
       },
     },
   },
-})
+});
