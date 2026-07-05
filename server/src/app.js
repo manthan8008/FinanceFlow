@@ -26,9 +26,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDistPath = path.resolve(__dirname, "../../client/dist");
 const shouldServeClient =
   env.NODE_ENV === "production" && existsSync(clientDistPath);
+const allowedOrigins = env.CLIENT_URL.split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
 
 app.use(helmet());
-app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+
+      const normalizedOrigin = origin.replace(/\/$/, "");
+      return callback(null, allowedOrigins.includes(normalizedOrigin));
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(sanitizeMongoInput);

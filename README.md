@@ -337,6 +337,16 @@ Set:
 VITE_API_URL=https://your-backend-url/api
 ```
 
+For this project on Vercel, the value should include the Render origin and the
+`/api` path:
+
+```env
+VITE_API_URL=https://financeflow-backend-58w4.onrender.com/api
+```
+
+Vite reads `VITE_*` variables at build time, so redeploy the frontend after
+changing this value.
+
 ### Backend
 
 The Express API can be deployed to Render, Railway, Fly.io, or similar Node hosting providers.
@@ -351,6 +361,31 @@ MONGODB_URI=your-mongodb-atlas-uri
 JWT_SECRET=your-production-secret
 GEMINI_API_KEY=your-gemini-api-key
 GEMINI_MODEL=gemini-2.5-flash
+```
+
+`CLIENT_URL` must be the exact browser origin of the deployed frontend, such as:
+
+```env
+CLIENT_URL=https://your-vercel-project.vercel.app
+```
+
+To allow multiple frontend origins, separate them with commas:
+
+```env
+CLIENT_URL=http://localhost:5173,https://your-vercel-project.vercel.app,https://www.your-custom-domain.com
+```
+
+After changing Render environment variables, redeploy or restart the Render
+service. You can verify CORS from a terminal with:
+
+```bash
+curl -i -H "Origin: https://your-vercel-project.vercel.app" https://financeflow-backend-58w4.onrender.com/api/health
+```
+
+The response should include:
+
+```txt
+access-control-allow-origin: https://your-vercel-project.vercel.app
 ```
 
 ### Database
