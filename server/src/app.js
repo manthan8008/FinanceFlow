@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
@@ -19,6 +22,11 @@ import { sanitizeMongoInput } from "./middleware/sanitize.js";
 
 export const app = express();
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDistPath = path.resolve(__dirname, "../../client/dist");
+const shouldServeClient =
+  env.NODE_ENV === "production" && existsSync(clientDistPath);
+
 app.use(helmet());
 app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
@@ -27,6 +35,10 @@ app.use(sanitizeMongoInput);
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300 }));
 app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use("/uploads", express.static("uploads"));
+
+if (shouldServeClient) {
+  app.use(express.static(clientDistPath));
+}
 
 app.get("/", (_req, res) => res.json({ message: "FinanceFlow API is running" }));
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
@@ -41,6 +53,12 @@ app.use("/api/ai", aiRouter);
 app.use("/api/notifications", notificationsRouter);
 app.use("/api/profile", profileRouter);
 app.use("/api/reports", reportsRouter);
+
+if (shouldServeClient) {
+  app.get(/^\/(?!api\/|assets\/).*/, (_req, res) => {
+    res.sendFile(path.join(clientDistPath, "index.html"));
+  });
+}
 
 app.use(notFound);
 app.use(errorHandler);
