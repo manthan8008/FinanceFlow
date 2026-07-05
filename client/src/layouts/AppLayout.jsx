@@ -106,20 +106,13 @@ export default function AppLayout() {
               Your financial command center
             </h1>
           </div>
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2 justify-end">
             <button
               className="btn-secondary px-3"
               onClick={toggleTheme}
               aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <button
-              className="btn-secondary px-3"
-              onClick={() => navigate("/app/notifications")}
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
             </button>
             <button
               className="btn-secondary px-3"
