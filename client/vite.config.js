@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": "http://localhost:5000",
+      "/api": "https://financeflow-backend-58w4.onrender.com",
     },
   },
   build: {
