@@ -32,11 +32,16 @@ export default function Expenses() {
   const filtered = useMemo(() => {
     return items
       .filter((item) => {
-        const haystack = `${item.title} ${item.merchant || ""} ${item.notes || ""}`.toLowerCase();
-        return (category === "All" || item.category === category) && haystack.includes(query.toLowerCase());
+        const haystack =
+          `${item.title} ${item.merchant || ""} ${item.notes || ""}`.toLowerCase();
+        return (
+          (category === "All" || item.category === category) &&
+          haystack.includes(query.toLowerCase())
+        );
       })
       .sort((a, b) => {
-        if (sortBy === "amount-desc") return Number(b.amount) - Number(a.amount);
+        if (sortBy === "amount-desc")
+          return Number(b.amount) - Number(a.amount);
         if (sortBy === "amount-asc") return Number(a.amount) - Number(b.amount);
         if (sortBy === "date-asc") return new Date(a.date) - new Date(b.date);
         return new Date(b.date) - new Date(a.date);
@@ -44,12 +49,20 @@ export default function Expenses() {
   }, [items, query, category, sortBy]);
 
   const summary = useMemo(() => {
-    const total = filtered.reduce((sum, item) => sum + Number(item.amount || 0), 0);
-    const categoryTotals = filtered.reduce(
-      (acc, item) => ({ ...acc, [item.category]: (acc[item.category] || 0) + Number(item.amount || 0) }),
-      {}
+    const total = filtered.reduce(
+      (sum, item) => sum + Number(item.amount || 0),
+      0,
     );
-    const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0];
+    const categoryTotals = filtered.reduce(
+      (acc, item) => ({
+        ...acc,
+        [item.category]: (acc[item.category] || 0) + Number(item.amount || 0),
+      }),
+      {},
+    );
+    const topCategory = Object.entries(categoryTotals).sort(
+      (a, b) => b[1] - a[1],
+    )[0];
 
     return {
       total,
@@ -70,7 +83,11 @@ export default function Expenses() {
 
     if (editingId) {
       const { data } = await financeService.updateExpense(editingId, payload);
-      setItems((current) => current.map((item) => (item.id === editingId || item._id === editingId ? data : item)));
+      setItems((current) =>
+        current.map((item) =>
+          item.id === editingId || item._id === editingId ? data : item,
+        ),
+      );
       toast.success("Expense updated");
     } else {
       const { data } = await financeService.createExpense(payload);
@@ -95,19 +112,11 @@ export default function Expenses() {
 
   async function deleteExpense(id) {
     await financeService.deleteExpense(id);
-    setItems((current) => current.filter((item) => item.id !== id && item._id !== id));
+    setItems((current) =>
+      current.filter((item) => item.id !== id && item._id !== id),
+    );
     if (editingId === id) resetForm();
     toast.success("Expense deleted");
-  }
-
-  async function scanReceipt(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("receipt", file);
-    const { data } = await financeService.scanReceipt(formData);
-    setForm((current) => ({ ...current, title: data.merchant, amount: data.amount, date: data.date }));
-    toast.success("Receipt details detected");
   }
 
   return (
@@ -115,46 +124,96 @@ export default function Expenses() {
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <div className="panel min-w-0 p-4 sm:p-5">
           <p className="label">Filtered spend</p>
-          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">{formatCurrency(summary.total, currency)}</p>
+          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">
+            {formatCurrency(summary.total, currency)}
+          </p>
         </div>
         <div className="panel min-w-0 p-4 sm:p-5">
           <p className="label">Transactions</p>
-          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">{summary.count}</p>
+          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">
+            {summary.count}
+          </p>
         </div>
         <div className="panel min-w-0 p-4 sm:p-5">
           <p className="label">Average expense</p>
-          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">{formatCurrency(summary.average, currency)}</p>
+          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">
+            {formatCurrency(summary.average, currency)}
+          </p>
         </div>
         <div className="panel min-w-0 p-4 sm:p-5">
           <p className="label">Top category</p>
-          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">{summary.topCategory}</p>
+          <p className="mt-2 truncate text-xl font-extrabold sm:text-2xl">
+            {summary.topCategory}
+          </p>
         </div>
       </section>
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-[0.8fr_1.2fr]">
         <form onSubmit={saveExpense} className="panel space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-xl font-bold">{editingId ? "Edit expense" : "Add expense"}</h2>
+            <h2 className="text-xl font-bold">
+              {editingId ? "Edit expense" : "Add expense"}
+            </h2>
             {editingId && (
-              <button type="button" onClick={resetForm} className="btn-secondary px-3" aria-label="Cancel editing">
+              <button
+                type="button"
+                onClick={resetForm}
+                className="btn-secondary px-3"
+                aria-label="Cancel editing"
+              >
                 <X size={18} />
               </button>
             )}
           </div>
-          <input className="input" placeholder="Title" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-          <input className="input" placeholder="Amount" required type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Title"
+            required
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+          />
+          <input
+            className="input"
+            placeholder="Amount"
+            required
+            type="number"
+            min="0"
+            step="0.01"
+            value={form.amount}
+            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+          />
           <div className="grid gap-3 sm:grid-cols-2">
-            <select className="input" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
-              {categories.map((item) => <option key={item}>{item}</option>)}
+            <select
+              className="input"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            >
+              {categories.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
             </select>
-            <input className="input" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+            <input
+              className="input"
+              type="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+            />
           </div>
-          <input className="input" placeholder="Payment method" value={form.paymentMethod} onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })} />
-          <textarea className="input min-h-24" placeholder="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          <label className="btn-secondary w-full cursor-pointer">
-            <Camera size={18} /> Scan receipt
-            <input className="hidden" type="file" accept="image/png,image/jpeg,application/pdf" onChange={scanReceipt} />
-          </label>
+          <input
+            className="input"
+            placeholder="Payment method"
+            value={form.paymentMethod}
+            onChange={(e) =>
+              setForm({ ...form, paymentMethod: e.target.value })
+            }
+          />
+          <textarea
+            className="input min-h-24"
+            placeholder="Notes"
+            value={form.notes}
+            onChange={(e) => setForm({ ...form, notes: e.target.value })}
+          />
+
           <button className="btn-primary w-full">
             {editingId ? <Check size={18} /> : <Plus size={18} />}
             {editingId ? "Save expense" : "Add expense"}
@@ -166,14 +225,32 @@ export default function Expenses() {
             <h2 className="text-xl font-bold">Expenses</h2>
             <div className="grid w-full min-w-0 gap-2 md:w-auto md:grid-cols-[minmax(11rem,1fr)_10rem_11rem]">
               <div className="relative">
-                <Search className="absolute left-3 top-3 text-zinc-400" size={16} />
-                <input className="input pl-9" placeholder="Search" value={query} onChange={(e) => setQuery(e.target.value)} />
+                <Search
+                  className="absolute left-3 top-3 text-zinc-400"
+                  size={16}
+                />
+                <input
+                  className="input pl-9"
+                  placeholder="Search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
               </div>
-              <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
+              <select
+                className="input"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
                 <option>All</option>
-                {categories.map((item) => <option key={item}>{item}</option>)}
+                {categories.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
               </select>
-              <select className="input" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <select
+                className="input"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
                 <option value="date-desc">Newest first</option>
                 <option value="date-asc">Oldest first</option>
                 <option value="amount-desc">Highest amount</option>
@@ -186,26 +263,49 @@ export default function Expenses() {
             {filtered.map((item) => {
               const id = item.id || item._id;
               return (
-                <article key={id} className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5">
+                <article
+                  key={id}
+                  className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-white/10 dark:bg-white/5"
+                >
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0">
                       <h3 className="truncate font-bold">{item.title}</h3>
-                      <p className="mt-1 text-xs text-zinc-500">{item.category} · {formatDate(item.date)}</p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {item.category} · {formatDate(item.date)}
+                      </p>
                     </div>
-                    <p className="shrink-0 text-right font-extrabold">{formatCurrency(item.amount, currency)}</p>
+                    <p className="shrink-0 text-right font-extrabold">
+                      {formatCurrency(item.amount, currency)}
+                    </p>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <p className="min-w-0 truncate text-sm text-zinc-500">{item.paymentMethod || "Payment method"}</p>
+                    <p className="min-w-0 truncate text-sm text-zinc-500">
+                      {item.paymentMethod || "Payment method"}
+                    </p>
                     <div className="flex shrink-0 gap-2">
-                      <button type="button" onClick={() => editExpense(item)} className="btn-secondary px-3 py-2" aria-label={`Edit ${item.title}`}>
+                      <button
+                        type="button"
+                        onClick={() => editExpense(item)}
+                        className="btn-secondary px-3 py-2"
+                        aria-label={`Edit ${item.title}`}
+                      >
                         <Pencil size={16} />
                       </button>
-                      <button type="button" onClick={() => deleteExpense(id)} className="btn-secondary px-3 py-2 text-rose-600" aria-label={`Delete ${item.title}`}>
+                      <button
+                        type="button"
+                        onClick={() => deleteExpense(id)}
+                        className="btn-secondary px-3 py-2 text-rose-600"
+                        aria-label={`Delete ${item.title}`}
+                      >
                         <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
-                  {item.notes && <p className="mt-3 line-clamp-2 text-sm text-zinc-500">{item.notes}</p>}
+                  {item.notes && (
+                    <p className="mt-3 line-clamp-2 text-sm text-zinc-500">
+                      {item.notes}
+                    </p>
+                  )}
                 </article>
               );
             })}
@@ -227,21 +327,40 @@ export default function Expenses() {
                 {filtered.map((item) => {
                   const id = item.id || item._id;
                   return (
-                    <tr key={id} className="border-t border-zinc-100 dark:border-white/10">
+                    <tr
+                      key={id}
+                      className="border-t border-zinc-100 dark:border-white/10"
+                    >
                       <td className="py-3 font-semibold">
                         <span>{item.title}</span>
-                        {item.notes && <span className="block max-w-64 truncate text-xs font-normal text-zinc-500">{item.notes}</span>}
+                        {item.notes && (
+                          <span className="block max-w-64 truncate text-xs font-normal text-zinc-500">
+                            {item.notes}
+                          </span>
+                        )}
                       </td>
                       <td>{item.category}</td>
                       <td>{formatDate(item.date)}</td>
                       <td>{item.paymentMethod}</td>
-                      <td className="text-right font-bold">{formatCurrency(item.amount, currency)}</td>
+                      <td className="text-right font-bold">
+                        {formatCurrency(item.amount, currency)}
+                      </td>
                       <td>
                         <div className="flex justify-end gap-2">
-                          <button type="button" onClick={() => editExpense(item)} className="btn-secondary px-3 py-2" aria-label={`Edit ${item.title}`}>
+                          <button
+                            type="button"
+                            onClick={() => editExpense(item)}
+                            className="btn-secondary px-3 py-2"
+                            aria-label={`Edit ${item.title}`}
+                          >
                             <Pencil size={16} />
                           </button>
-                          <button type="button" onClick={() => deleteExpense(id)} className="btn-secondary px-3 py-2 text-rose-600" aria-label={`Delete ${item.title}`}>
+                          <button
+                            type="button"
+                            onClick={() => deleteExpense(id)}
+                            className="btn-secondary px-3 py-2 text-rose-600"
+                            aria-label={`Delete ${item.title}`}
+                          >
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -252,7 +371,11 @@ export default function Expenses() {
               </tbody>
             </table>
           </div>
-          {!filtered.length && <p className="py-10 text-center text-sm text-zinc-500">No expenses match the current filters.</p>}
+          {!filtered.length && (
+            <p className="py-10 text-center text-sm text-zinc-500">
+              No expenses match the current filters.
+            </p>
+          )}
         </section>
       </div>
     </div>
