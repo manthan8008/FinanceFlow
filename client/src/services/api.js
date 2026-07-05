@@ -1,7 +1,16 @@
 import axios from "axios";
 
+function getApiBaseUrl() {
+  const apiUrl = import.meta.env.VITE_API_URL?.trim();
+
+  if (!apiUrl) return "/api";
+
+  const normalizedUrl = apiUrl.replace(/\/$/, "");
+  return normalizedUrl.endsWith("/api") ? normalizedUrl : `${normalizedUrl}/api`;
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  baseURL: getApiBaseUrl(),
   timeout: 15000,
 });
 
