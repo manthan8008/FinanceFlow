@@ -2,8 +2,6 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Bell,
   Bot,
-  CalendarDays,
-  ChartPie,
   CreditCard,
   Flag,
   LayoutDashboard,

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { Camera, Check, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Check, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { financeService } from "../services/financeService.js";
 import { categories } from "../data/demoData.js";
 import { formatCurrency, formatDate } from "../utils/formatters.js";

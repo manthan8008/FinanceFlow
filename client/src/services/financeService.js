@@ -6,6 +6,7 @@ const STORAGE_KEYS = {
   expenses: "financeflow_expenses",
   incomes: "financeflow_incomes",
   budgets: "financeflow_budgets",
+  goals: "financeflow_goals",
 };
 
 function readCollection(key, seed) {
@@ -36,6 +37,10 @@ function getIncomes() {
 
 function getBudgets() {
   return readCollection("budgets", budgets);
+}
+
+function getGoals() {
+  return readCollection("goals", goals);
 }
 
 function createId(prefix) {
@@ -117,6 +122,23 @@ export const financeService = {
       return fallback(income);
     }
   },
+  updateIncome: async (id, payload) => {
+    try {
+      return await api.put(`/incomes/${id}`, payload);
+    } catch {
+      const updated = getIncomes().map((item) => (item.id === id || item._id === id ? { ...item, ...payload } : item));
+      writeCollection("incomes", updated);
+      return fallback(updated.find((item) => item.id === id || item._id === id));
+    }
+  },
+  deleteIncome: async (id) => {
+    try {
+      return await api.delete(`/incomes/${id}`);
+    } catch {
+      writeCollection("incomes", getIncomes().filter((item) => item.id !== id && item._id !== id));
+      return fallback({ id });
+    }
+  },
   budgets: () => safeRequest(() => api.get("/budgets"), getBudgets),
   createBudget: async (payload) => {
     try {
@@ -127,10 +149,50 @@ export const financeService = {
       return fallback(budget);
     }
   },
-  goals: () => safeRequest(() => api.get("/goals"), goals),
-  createGoal: (payload) => safeRequest(() => api.post("/goals", payload), { ...payload, id: crypto.randomUUID() }),
-  updateGoal: (id, payload) => safeRequest(() => api.put(`/goals/${id}`, payload), { ...payload, id }),
-  deleteGoal: (id) => safeRequest(() => api.delete(`/goals/${id}`), { id }),
+  updateBudget: async (id, payload) => {
+    try {
+      return await api.put(`/budgets/${id}`, payload);
+    } catch {
+      const updated = getBudgets().map((item) => (item.id === id || item._id === id ? { ...item, ...payload } : item));
+      writeCollection("budgets", updated);
+      return fallback(updated.find((item) => item.id === id || item._id === id));
+    }
+  },
+  deleteBudget: async (id) => {
+    try {
+      return await api.delete(`/budgets/${id}`);
+    } catch {
+      writeCollection("budgets", getBudgets().filter((item) => item.id !== id && item._id !== id));
+      return fallback({ id });
+    }
+  },
+  goals: () => safeRequest(() => api.get("/goals"), getGoals),
+  createGoal: async (payload) => {
+    try {
+      return await api.post("/goals", payload);
+    } catch {
+      const goal = { ...payload, id: createId("goal") };
+      writeCollection("goals", [goal, ...getGoals()]);
+      return fallback(goal);
+    }
+  },
+  updateGoal: async (id, payload) => {
+    try {
+      return await api.put(`/goals/${id}`, payload);
+    } catch {
+      const updated = getGoals().map((item) => (item.id === id || item._id === id ? { ...item, ...payload } : item));
+      writeCollection("goals", updated);
+      return fallback(updated.find((item) => item.id === id || item._id === id));
+    }
+  },
+  deleteGoal: async (id) => {
+    try {
+      return await api.delete(`/goals/${id}`);
+    } catch {
+      writeCollection("goals", getGoals().filter((item) => item.id !== id && item._id !== id));
+      return fallback({ id });
+    }
+  },
   notifications: () => safeRequest(() => api.get("/notifications"), notifications),
   reports: (type) => safeRequest(() => api.get(`/reports/${type}`), { type, monthlySeries, expenses: getExpenses(), budgets: getBudgets() }),
   askAi: (message) =>
