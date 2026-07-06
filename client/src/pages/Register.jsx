@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext.jsx";
 
 export default function Register() {
-  const [form, setForm] = useState({ name: "", email: "", password: "", currency: "INR", monthlyIncome: 0, savingsGoal: 0 });
+  const [form, setForm] = useState({ name: "", email: "", password: "", currency: "INR", monthlyIncome: "", savingsGoal: "" });
   const { register } = useAuth();
   const navigate = useNavigate();
 
