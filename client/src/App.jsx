@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
+import { useAuth } from "./contexts/AuthContext.jsx";
 import PublicLayout from "./layouts/PublicLayout.jsx";
 import AppLayout from "./layouts/AppLayout.jsx";
 import Landing from "./pages/Landing.jsx";
@@ -20,15 +21,23 @@ import Settings from "./pages/Settings.jsx";
 import About from "./pages/About.jsx";
 import Contact from "./pages/Contact.jsx";
 
+function PublicOnly({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return <div className="grid min-h-screen place-items-center bg-cloud text-sm font-semibold dark:bg-zinc-950 dark:text-white">Loading workspace...</div>;
+  if (isAuthenticated) return <Navigate to="/app" replace />;
+  return children;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route element={<PublicLayout />}>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<PublicOnly><Landing /></PublicOnly>} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<PublicOnly><Login /></PublicOnly>} />
+        <Route path="/register" element={<PublicOnly><Register /></PublicOnly>} />
         <Route path="/reset-password" element={<ResetPassword />} />
       </Route>
 

@@ -10,7 +10,7 @@ export default function PublicLayout() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
           <Link to="/" className="flex items-center gap-2 text-lg font-extrabold">
             <span className="grid size-10 place-items-center rounded-xl bg-ink text-white dark:bg-white dark:text-ink"><WalletCards size={20} /></span>
-            FinanceFlow
+            
           </Link>
           <div className="hidden items-center gap-6 text-sm font-semibold md:flex">
             <NavLink to="/about">About</NavLink>

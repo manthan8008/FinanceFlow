@@ -25,13 +25,22 @@ function toProfile(user) {
   return profile;
 }
 
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem("financeflow_user") || "null");
+  } catch {
+    localStorage.removeItem("financeflow_user");
+    return null;
+  }
+}
+
 function isNetworkFallback(error) {
   return error.message === "Network Error" || error.message.includes("timeout") || !navigator.onLine;
 }
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("financeflow_token"));
-  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem("financeflow_user") || "null"));
+  const [user, setUser] = useState(readStoredUser);
   const [loading, setLoading] = useState(Boolean(token));
 
   const logout = useCallback((showToast = true) => {
@@ -52,8 +61,8 @@ export function AuthProvider({ children }) {
         const { data } = await api.get("/auth/me");
         setUser(data.user);
         localStorage.setItem("financeflow_user", JSON.stringify(data.user));
-      } catch {
-        logout(false);
+      } catch (error) {
+        if (!isNetworkFallback(error)) logout(false);
       } finally {
         setLoading(false);
       }
